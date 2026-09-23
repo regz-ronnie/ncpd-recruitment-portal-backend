@@ -1,0 +1,87 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+  {{ block.super }}
+
+  <div class="report-charts" style="margin-top: 20px;">
+    <h2>Report Charts</h2>
+    <div id="report-chart-summary" style="margin-bottom: 20px; white-space: pre-wrap; background:#f9f9f9; padding:10px; border:1px solid #ddd;">
+      <strong>Summary</strong>
+      <p>{{ report_summary }}</p>
+    </div>
+    <div id="report-charts-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+      <div style="background:#fff; padding:15px; border:1px solid #ddd; border-radius:4px;">
+        <h3>Job Status Counts</h3>
+        <canvas id="jobStatusChart"></canvas>
+      </div>
+      <div style="background:#fff; padding:15px; border:1px solid #ddd; border-radius:4px;">
+        <h3>Application Status Counts</h3>
+        <canvas id="applicationStatusChart"></canvas>
+      </div>
+      <div style="background:#fff; padding:15px; border:1px solid #ddd; border-radius:4px;">
+        <h3>Interview Status Counts</h3>
+        <canvas id="interviewStatusChart"></canvas>
+      </div>
+      <div style="background:#fff; padding:15px; border:1px solid #ddd; border-radius:4px;">
+        <h3>User Type Counts</h3>
+        <canvas id="userTypeChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    (function() {
+      const data = {{ report_chart_data|safe }};
+
+      function createChart(canvasId, labelKey, valueKey, title) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        const labels = data[labelKey].map(item => {
+          if (labelKey === 'user_type_counts') {
+            return item.user_type || item.type || item.label || 'Unknown';
+          }
+          return item.status || item.category || item.name || item.label || 'Unknown';
+        });
+        const values = data[labelKey].map(item => item[valueKey] || 0);
+        return new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              label: title,
+              data: values,
+              backgroundColor: 'rgba(54, 162, 235, 0.6)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+
+      if (data.job_status_counts) {
+        createChart('jobStatusChart', 'job_status_counts', 'count', 'Job Status Counts');
+      }
+      if (data.application_status_counts) {
+        createChart('applicationStatusChart', 'application_status_counts', 'count', 'Application Status Counts');
+      }
+      if (data.interview_status_counts) {
+        createChart('interviewStatusChart', 'interview_status_counts', 'count', 'Interview Status Counts');
+      }
+      if (data.user_type_counts) {
+        createChart('userTypeChart', 'user_type_counts', 'count', 'User Type Counts');
+      }
+    })();
+  </script>
+{% endblock %}

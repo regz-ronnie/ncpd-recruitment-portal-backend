@@ -1,0 +1,14 @@
+Testing AI Shortlisting Service...
+Testing with application: 11
+Applicant: Ronald Kiprotich
+Job: DIRECTOR POLICY, PROGRAMMES AND PARTNERSHIP – GRADE NCPD 2
+AI Analysis Results:
+Total Score: 48.4
+Recommendation: Borderline - Weak Match
+Skill Score: 100.0
+Experience Score: 0.0
+Qualification Score: 28.0
+Strengths: ['Good educational background (bachelor)']
+Gaps: ['Insufficient years of experience', 'Lack of relevant work experience']
+Flags: ['No resume/CV uploaded', 'Experience significantly below requirements', 'Qualifications significantly below requirements']
+AI shortlisting service test completed successfully!
