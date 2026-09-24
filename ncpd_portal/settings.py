@@ -19,9 +19,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-me-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
+if os.getenv('VERCEL'):
+    ALLOWED_HOSTS.append(os.getenv('VERCEL_URL', '').replace('https://', '').replace('http://', ''))
+    ALLOWED_HOSTS.append('.vercel.app')
 
 # Application definition
 DJANGO_APPS = [
