@@ -87,3 +87,6 @@ def handler(event, context):
             'headers': {'Content-Type': 'application/json'},
             'body': f'{{"error": "{str(e)}"}}',
         }
+
+# Vercel looks for 'app' or 'application' at module level
+app = handler
