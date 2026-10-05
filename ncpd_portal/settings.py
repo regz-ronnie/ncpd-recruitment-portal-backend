@@ -46,16 +46,11 @@ THIRD_PARTY_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'dj_rest_auth',
-    'django_extensions',
-    'channels',
     'captcha',
 ]
 
 LOCAL_APPS = [
     'apps.recruitment',
-    'apps.ai_engine',
-    'apps.workflow',
-    'apps.integrations',
     'apps.users',
 ]
 
@@ -208,7 +203,7 @@ ALLOWED_HOSTS = ["*"]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://192.168.0.104:3000",
+    "http://192.168.0.103:3000",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -273,7 +268,7 @@ X_FRAME_OPTIONS = 'ALLOWALL'
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'http://192.168.0.104:3000',
+    'http://192.168.0.103:3000',
 ]
 
 # Logging
