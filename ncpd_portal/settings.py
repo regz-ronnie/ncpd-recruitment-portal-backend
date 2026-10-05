@@ -95,17 +95,21 @@ ASGI_APPLICATION = 'ncpd_portal.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',
-        'USER': 'neondb_owner',
-        'PASSWORD': 'npg_BbJSGQ71xOer',
-        'HOST': 'ep-dark-band-ann92ig3-pooler.c-6.us-east-1.aws.neon.tech',
-        'PORT': '5432',
+        'NAME': os.getenv('DB_NAME', 'neondb'),
+        'USER': os.getenv('DB_USER', 'neondb_owner'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
         'OPTIONS': {
             'sslmode': 'require',
-            'channel_binding': 'require',
         }
     }
 }
+
+# Use DATABASE_URL if provided (for Vercel/Render)
+if os.getenv('DATABASE_URL'):
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
