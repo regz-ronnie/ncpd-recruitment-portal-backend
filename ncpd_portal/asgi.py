@@ -3,24 +3,35 @@ ASGI config for ncpd_portal project.
 """
 
 import os
+
 from django.core.asgi import get_asgi_application
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-from channels.security.websocket import AllowedHostsOriginValidator
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ncpd_portal.settings')
 
-django_asgi_app = get_asgi_application()
+application = get_asgi_application()
 
-import apps.workflow.routing
+try:
+    from channels.auth import AuthMiddlewareStack
+    from channels.routing import ProtocolTypeRouter, URLRouter
+    from channels.security.websocket import AllowedHostsOriginValidator
 
-application = ProtocolTypeRouter({
-    "http": django_asgi_app,
-    "websocket": AllowedHostsOriginValidator(
-        AuthMiddlewareStack(
-            URLRouter(
-                apps.workflow.routing.websocket_urlpatterns
-            )
-        )
-    ),
-})
+    try:
+        import apps.workflow.routing as workflow_routing
+    except ModuleNotFoundError:
+        workflow_routing = None
+
+    if workflow_routing is not None and hasattr(workflow_routing, 'websocket_urlpatterns'):
+        application = ProtocolTypeRouter({
+            "http": application,
+            "websocket": AllowedHostsOriginValidator(
+                AuthMiddlewareStack(
+                    URLRouter(workflow_routing.websocket_urlpatterns)
+                )
+            ),
+        })
+    else:
+        application = application
+except ImportError:
+    # Some deployments (such as Vercel serverless builds) do not need WebSockets.
+    # Keep ASGI compatible without channels installed.
+    application = application
