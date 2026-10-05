@@ -42,10 +42,6 @@ urlpatterns = [
     path('api/recruitment/', include(('apps.recruitment.urls', 'recruitment'), namespace='recruitment')),
     path('api/hr/', include(('apps.recruitment.hr_urls', 'hr'), namespace='hr')),
     path('api/v1/hr/', include(('apps.recruitment.hr_urls', 'hr'), namespace='hr-v1')),
-    path('api/ai-engine/', include(('apps.ai_engine.urls', 'ai_engine'), namespace='ai_engine')),
-    path('api/v1/ai-engine/', include(('apps.ai_engine.urls', 'ai_engine'), namespace='ai_engine-v1')),
-    path('api/workflow/', include('apps.workflow.urls')),
-    path('api/integrations/', include('apps.integrations.urls')),
     
     # Frontend routing (for SPA)
     # path('', include('frontend_urls')),
