@@ -205,13 +205,16 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
-ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://192.168.0.103:3000",
 ]
+# Add Vercel frontend URL if in environment
+if os.getenv('FRONTEND_URL'):
+    CORS_ALLOWED_ORIGINS.append(os.getenv('FRONTEND_URL'))
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins for development
 
 CORS_ALLOW_CREDENTIALS = True
 
