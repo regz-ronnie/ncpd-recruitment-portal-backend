@@ -81,15 +81,16 @@ def handler(event, context):
         return {
             'statusCode': int(response_data['status'].split()[0]),
             'headers': response_data['headers'],
-            'body': body_content.decode('utf-8'),
+            'body': body_content,
         }
     except Exception as e:
         print(f"Handler error: {e}")
         traceback.print_exc()
+        error_body = f'{{"error": "{str(e)}"}}'.encode('utf-8')
         return {
             'statusCode': 500,
             'headers': {'Content-Type': 'application/json'},
-            'body': f'{{"error": "{str(e)}"}}',
+            'body': error_body,
         }
 
 # Vercel looks for 'app' or 'application' at module level
