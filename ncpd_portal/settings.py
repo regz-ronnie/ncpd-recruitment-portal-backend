@@ -236,8 +236,10 @@ CORS_ALLOWED_ORIGINS = [
 # Add Vercel frontend URL if in environment
 if os.getenv('FRONTEND_URL'):
     CORS_ALLOWED_ORIGINS.append(os.getenv('FRONTEND_URL'))
-CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins for development
+# Always add the Vercel frontend URL
+CORS_ALLOWED_ORIGINS.append("https://ncpd-recruitment-portal.vercel.app")
 
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins for development
 CORS_ALLOW_CREDENTIALS = True
 
 # Celery Configuration
