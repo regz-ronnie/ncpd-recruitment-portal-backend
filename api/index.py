@@ -43,15 +43,19 @@ def handler(event, context):
         query = event.get('queryStringParameters', {}) or {}
         
         # Build Django WSGI environ
+        # Get the actual host from headers
+        host = headers.get('host', headers.get('x-forwarded-host', 'localhost'))
+        server_name = host.split(':')[0]  # Remove port if present
+        
         environ = {
             'REQUEST_METHOD': method,
             'PATH_INFO': path,
             'QUERY_STRING': '&'.join(f"{k}={v}" for k, v in query.items()),
             'CONTENT_TYPE': headers.get('content-type', ''),
             'CONTENT_LENGTH': str(len(body)) if body else '0',
-            'SERVER_NAME': 'vercel',
-            'SERVER_PORT': '443',
-            'wsgi.url_scheme': 'https',
+            'SERVER_NAME': server_name,
+            'SERVER_PORT': headers.get('x-forwarded-port', '443'),
+            'wsgi.url_scheme': headers.get('x-forwarded-proto', 'https'),
             'wsgi.input': BytesIO(body.encode() if body else b''),
             'wsgi.errors': sys.stderr,
             'wsgi.version': (1, 0),
