@@ -22,12 +22,34 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-me-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0').split(',')
+# Support local LAN/dev access from frontend and Vercel hosts without brittle env parsing.
+def _get_allowed_hosts():
+    configured_hosts = os.getenv('ALLOWED_HOSTS', '')
+    hosts = []
+    for host in configured_hosts.split(',') if configured_hosts else []:
+        cleaned = host.strip()
+        if cleaned:
+            hosts.append(cleaned)
+
+    default_hosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '192.168.0.105', '192.168.1.10']
+    hosts.extend(default_hosts)
+
+    if os.getenv('VERCEL'):
+        vercel_url = os.getenv('VERCEL_URL', '').replace('https://', '').replace('http://', '')
+        if vercel_url:
+            hosts.append(vercel_url)
+        hosts.append('.vercel.app')
+
+    # Keep only unique, non-empty values
+    return list(dict.fromkeys(host for host in hosts if host))
+
+ALLOWED_HOSTS = _get_allowed_hosts()
+
+# For Vercel serverless, allow all hosts (will be restricted by CORS)
 if os.getenv('VERCEL'):
-    ALLOWED_HOSTS.append(os.getenv('VERCEL_URL', '').replace('https://', '').replace('http://', ''))
-    ALLOWED_HOSTS.append('.vercel.app')
+    ALLOWED_HOSTS = ['*']
 
 # Application definition
 DJANGO_APPS = [
@@ -209,7 +231,7 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://192.168.0.103:3000",
+    "http://192.168.0.105:3000",
 ]
 # Add Vercel frontend URL if in environment
 if os.getenv('FRONTEND_URL'):
@@ -278,7 +300,7 @@ X_FRAME_OPTIONS = 'ALLOWALL'
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'http://192.168.0.103:3000',
+    'http://192.168.0.105:3000',
 ]
 
 # Logging
