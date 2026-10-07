@@ -302,7 +302,7 @@ if os.getenv('VERCEL'):
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = 'resend'
     EMAIL_HOST_PASSWORD = os.getenv('RESEND_API_KEY')
-    DEFAULT_FROM_EMAIL = os.getenv('RESEND_FROM_EMAIL', 'noreply@ncpd.go.ke')
+    DEFAULT_FROM_EMAIL = os.getenv('RESEND_FROM_EMAIL', 'onboarding@resend.dev')  # Use Resend's free verified domain
 else:
     # Development: Console backend
     EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
