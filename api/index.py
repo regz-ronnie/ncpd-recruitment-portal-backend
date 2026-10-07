@@ -19,6 +19,19 @@ except Exception as e:
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
 
+# Test database connection
+try:
+    from django.db import connection
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1")
+        print("Database connection successful")
+        cursor.execute("SELECT COUNT(*) FROM recruitment_jobpost")
+        job_count = cursor.fetchone()[0]
+        print(f"Job posts in database: {job_count}")
+except Exception as e:
+    print(f"Database connection failed: {e}")
+    traceback.print_exc()
+
 # Wrap application with error logging
 def application_with_logging(environ, start_response):
     try:
