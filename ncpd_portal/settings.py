@@ -18,21 +18,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
+
+def _get_env_list(name, default=None):
+    raw_value = os.getenv(name, '')
+    if raw_value:
+        return [value.strip() for value in raw_value.split(',') if value.strip()]
+    return default or []
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-me-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 # Support local LAN/dev access from frontend and Vercel hosts without brittle env parsing.
 def _get_allowed_hosts():
-    configured_hosts = os.getenv('ALLOWED_HOSTS', '')
-    hosts = []
-    for host in configured_hosts.split(',') if configured_hosts else []:
-        cleaned = host.strip()
-        if cleaned:
-            hosts.append(cleaned)
-
+    hosts = _get_env_list('ALLOWED_HOSTS', [])
     default_hosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '192.168.0.105', '192.168.1.10']
     hosts.extend(default_hosts)
 
@@ -42,14 +44,19 @@ def _get_allowed_hosts():
             hosts.append(vercel_url)
         hosts.append('.vercel.app')
 
-    # Keep only unique, non-empty values
     return list(dict.fromkeys(host for host in hosts if host))
+
 
 ALLOWED_HOSTS = _get_allowed_hosts()
 
 # For Vercel serverless, allow all hosts (will be restricted by CORS)
 if os.getenv('VERCEL'):
     ALLOWED_HOSTS = ['*']
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False').lower() == 'true' if not DEBUG else False
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 # Application definition
 DJANGO_APPS = [
@@ -171,6 +178,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
@@ -228,17 +236,30 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://192.168.0.105:3000",
-    "https://ncpd-recruitment-portal.vercel.app",
-]
-# Add Vercel frontend URL if in environment
+CORS_ALLOWED_ORIGINS = _get_env_list('CORS_ALLOWED_ORIGINS', [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://192.168.0.105:3000',
+    'https://ncpd-recruitment-portal.vercel.app',
+])
+
 if os.getenv('FRONTEND_URL'):
     CORS_ALLOWED_ORIGINS.append(os.getenv('FRONTEND_URL'))
 
+CORS_ALLOWED_ORIGIN_REGEXES = [r"^https://.*\.vercel\.app$"] if os.getenv('VERCEL') else []
 CORS_ALLOW_CREDENTIALS = False
+
+CSRF_TRUSTED_ORIGINS = _get_env_list('CSRF_TRUSTED_ORIGINS', [
+    'https://localhost:3000',
+    'http://localhost:3000',
+    'https://*.vercel.app',
+])
+
+if os.getenv('FRONTEND_URL'):
+    CSRF_TRUSTED_ORIGINS.append(os.getenv('FRONTEND_URL'))
+
+if os.getenv('VERCEL'):
+    CSRF_TRUSTED_ORIGINS.append('https://*.vercel.app')
 
 # Celery Configuration
 CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
@@ -249,11 +270,12 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
 # Channels (WebSocket)
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [REDIS_URL],
         },
     },
 }
