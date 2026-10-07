@@ -90,6 +90,7 @@ class User(AbstractUser):
     highest_education = models.CharField(
         max_length=50,
         choices=[
+            ('high_school', 'High School'),
             ('diploma', 'Diploma'),
             ('bachelor', 'Bachelor Degree'),
             ('master', 'Master Degree'),
@@ -97,6 +98,7 @@ class User(AbstractUser):
             ('professional_certification', 'Professional Certification'),
             ('other', 'Other'),
         ],
+        default='high_school',
         blank=True,
         null=True
     )
