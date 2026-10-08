@@ -328,6 +328,18 @@ CSRF_TRUSTED_ORIGINS = [
     'http://192.168.0.105:3000',
 ]
 
+# Session Configuration for Vercel
+if os.getenv('VERCEL'):
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_HTTPONLY = True
+else:
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_HTTPONLY = True
+
 # Logging
 LOGGING = {
     'version': 1,

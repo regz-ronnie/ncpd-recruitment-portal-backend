@@ -1,13 +1,18 @@
 """
 URL configuration for ncpd_portal project.
 """
+import os
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic.base import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from django.contrib.auth import get_user_model
+
+# Configure admin VIEW SITE link to point to frontend
+admin.site.site_url = os.environ.get('FRONTEND_URL', 'https://ncpd-recruitment-portal.vercel.app/')
 
 def api_info(request):
     return JsonResponse({
@@ -22,7 +27,9 @@ def api_info(request):
     })
 
 urlpatterns = [
-    path('', api_info, name='api-info'),
+    # Redirect base URL to admin login
+    path('', RedirectView.as_view(url='/admin/', permanent=False), name='index'),
+    
     path('admin/', admin.site.urls),
     
     # CAPTCHA URLs
