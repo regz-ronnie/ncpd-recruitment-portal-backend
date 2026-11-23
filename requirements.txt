@@ -22,3 +22,5 @@ dj-database-url>=2.1.0
 django-redis>=5.4.0
 channels>=4.1.0
 channels-redis>=4.0.0
+cloudinary>=1.40.0
+django-cloudinary-storage>=0.3.0
