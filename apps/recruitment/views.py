@@ -206,6 +206,24 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             raise ValidationError("You have already applied for this position.")
         
         serializer.save(applicant=self.request.user)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Map 'notes' to review_notes and stamp reviewer on status changes"""
+        instance = self.get_object()
+        data = request.data.copy()
+        notes = data.pop('notes', None)
+        if notes is not None:
+            data['review_notes'] = notes
+        status_changed = 'status' in data and data.get('status') != instance.status
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        if status_changed:
+            instance.refresh_from_db()
+            instance.reviewed_by = request.user
+            instance.review_date = timezone.now()
+            instance.save(update_fields=['reviewed_by', 'review_date'])
+        return Response(self.get_serializer(instance).data)
     
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def my_applications(self, request):
